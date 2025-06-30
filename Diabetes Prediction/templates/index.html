@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Diabetes Risk Predictor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    .model-performance-bottom {
+      background: #f9f9f9;
+      border-top: 1px solid #ddd;
+      padding: 20px 15px;
+      margin-top: 40px;
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    .model-performance-bottom h3 {
+      margin-top: 0;
+      color: #333;
+      text-align: center;
+      font-weight: 600;
+    }
+    .model-performance-bottom ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 10px 0 0 0;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .model-performance-bottom ul li {
+      background: #3498db;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      min-width: 110px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(52,152,219,0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>DIABETES PREDICTOR</h1>
+    <p>Enter your health details below to check diabetes risk.</p>
+    <div id="flash" class="flash" style="display: none;"></div>
+    <form id="predictForm">
+      <label>Pregnancies: <span class="range-info">(min: 0, step: 1)</span></label>
+      <input type="number" name="Pregnancies" min="0" step="1" required value="2">
+      <label>Glucose: <span class="range-info">(min: 0)</span></label>
+      <input type="number" name="Glucose" min="0" step="any" required value="120">
+      <label>Blood Pressure: <span class="range-info">(min: 0)</span></label>
+      <input type="number" name="BloodPressure" min="0" step="any" required value="70">
+      <label>Skin Thickness: <span class="range-info">(min: 0)</span></label>
+      <input type="number" name="SkinThickness" min="0" step="any" required value="20">
+      <label>Insulin: <span class="range-info">(min: 0)</span></label>
+      <input type="number" name="Insulin" min="0" step="any" required value="85">
+      <label>BMI: <span class="range-info">(min: 0)</span></label>
+      <input type="number" name="BMI" min="0" step="any" required value="28.5">
+      <label>Diabetes Pedigree Function: <span class="range-info">(min: 0)</span></label>
+      <input type="number" name="DiabetesPedigreeFunction" min="0" step="any" required value="0.6">
+      <label>Age: <span class="range-info">(min: 0, step: 1)</span></label>
+      <input type="number" name="Age" min="0" step="1" required value="30">
+      <button type="submit">Predict</button>
+    </form>
+    <div class="result-text" id="resultText">Prediction: <strong>Not Diabetic</strong>
+    </div>
+
+    <div id="glucoseMessage" class="warning-message center-box green-zone" style="display: block;">
+      <strong>Note:</strong> Glucose summary will appear here after prediction.
+    </div>
+
+    <div class="history-link center-box" style="margin-top: 30px;">
+      <a href="{{ url_for('history') }}">Dataset Distribution</a>
+    </div>
+
+    <div class="chart-container center-box" style="min-height: 300px;">
+      <canvas id="featureChart"></canvas>
+    </div>
+
+    <!-- Model performance summary moved here -->
+    <div class="model-performance-bottom">
+      <h3>Model Performance</h3>
+      <ul>
+        <li>Accuracy: {{ metrics.accuracy * 100 | round(2) }}%</li>
+        <li>Precision: {{ metrics.precision * 100 | round(2) }}%</li>
+        <li>Recall: {{ metrics.recall * 100 | round(2) }}%</li>
+        <li>F1 Score: {{ metrics.f1_score * 100 | round(2) }}%</li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    let chartRef = null;
+    const chartLabels = ["Pregnancies", "Glucose", "BloodPressure", "SkinThickness", "Insulin", "BMI", "DPF", "Age"];
+    // Initial
+    const initialChartData = [0, 0, 0, 0, 0, 0, 0, 0];
+    function drawChart(values) {
+      const ctx = document.getElementById('featureChart').getContext('2d');
+      if (chartRef) chartRef.destroy();
+
+      chartRef = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: chartLabels,
+          datasets: [{
+            label: 'Feature Values',
+            data: values,
+            backgroundColor: '#3498db',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    }
+
+    // Glucose 
+   
+function getGlucoseMessage(glucose, diagnosis) {
+  let base = `<strong>Prediction: ${diagnosis}</strong><br>`;
+
+  if (diagnosis === "Diabetic") {
+    return {
+      text: base + `Glucose Level: ${glucose} (High - Diabetic)<br>
+        <strong>What to do:</strong> 
+        <ul>
+          <li>Follow a prescribed diet plan and regular exercise.</li>
+          <li>Take medications or insulin as advised by your doctor.</li>
+          <li>Monitor your blood sugar daily and keep records.</li>
+          <li>Get regular check-ups for eyes, feet, and kidneys.</li>
+        </ul>
+        <strong>What NOT to do:</strong> 
+        <ul>
+          <li>Don’t skip doses or stop medication without consulting your doctor.</li>
+          <li>Don’t consume sugar-heavy or processed foods.</li>
+          <li>Don’t ignore symptoms like fatigue, thirst, or infections.</li>
+        </ul>`,
+      className: 'red-zone'
+    };
+  } else if (diagnosis === "Prediabetic") {
+    return {
+      text: base + `Glucose Level: ${glucose} (Elevated - Prediabetic)<br>
+        <strong>What to do:</strong> 
+        <ul>
+          <li>Adopt a low-carb, high-fiber diet.</li>
+          <li>Exercise 30 mins a day, 5 times a week.</li>
+          <li>Track your weight and reduce stress.</li>
+        </ul>
+        <strong>What NOT to do:</strong> 
+        <ul>
+          <li>Don’t eat high-sugar, high-fat foods regularly.</li>
+          <li>Don’t skip meals or overeat.</li>
+          <li>Don’t ignore mild symptoms like fatigue.</li>
+        </ul>`,
+      className: 'yellow-zone'
+    };
+  } else {
+    return {
+      text: base + `Glucose Level: ${glucose} (Normal)<br>
+        <strong>What to do:</strong> 
+        <ul>
+          <li>Continue maintaining a balanced diet and exercise.</li>
+          <li>Stay hydrated and sleep well.</li>
+          <li>Periodically monitor glucose if at risk.</li>
+        </ul>
+        <strong>What NOT to do:</strong> 
+        <ul>
+          <li>Don’t overindulge in sweets or junk food.</li>
+          <li>Don’t ignore risk factors like family history.</li>
+        </ul>`,
+      className: 'green-zone'
+    };
+  }
+}
+    document.getElementById('predictForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+      const numericData = {};
+      for (let key in data) numericData[key] = parseFloat(data[key]);
+      try {
+        const res = await fetch('/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(numericData)
+        });
+        const json = await res.json();
+        if (res.ok) {
+          const resultTextDiv = document.getElementById('resultText');
+          const strongTag = resultTextDiv.querySelector('strong');
+          strongTag.textContent = json.diagnosis;
+
+          document.getElementById('flash').style.display = 'none';
+
+          const msg = getGlucoseMessage(numericData.Glucose, json.diagnosis);
+          const msgBox = document.getElementById('glucoseMessage');
+          msgBox.innerHTML = msg.text;
+          msgBox.className = 'warning-message center-box ' + msg.className;
+          msgBox.style.display = 'block'; 
+          drawChart([
+            numericData.Pregnancies,
+            numericData.Glucose,
+            numericData.BloodPressure,
+            numericData.SkinThickness,
+            numericData.Insulin,
+            numericData.BMI,
+            numericData.DiabetesPedigreeFunction,
+            numericData.Age
+          ]);
+        } else {
+          document.getElementById('flash').innerText = json.error || 'Something went wrong.';
+          document.getElementById('flash').style.display = 'block';
+        }
+      } catch {
+        document.getElementById('flash').innerText = 'Server error.';
+        document.getElementById('flash').style.display = 'block';
+      }
+    });
+    
+    window.addEventListener('load', () => {
+      drawChart(initialChartData);
+    });
+  </script>
+</body>
+</html>

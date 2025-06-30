@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prediction Result - Diabetes Risk Predictor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="container result-container">
+    <h1>Prediction Result</h1>
+    <p class="result-text">The person is: <strong>{{ diagnosis }}</strong></p>
+    <a href="{{ url_for('index') }}" class="btn">Try Again</a>
+    <a href="{{ url_for('history') }}" class="btn">Distribution</a>
+  </div>
+  <div class="result-text" id="resultText"></div>
+    <div class="chart-container" style="width:100%; max-width:600px; margin:auto;">
+    <canvas id="featureChart"></canvas>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,226 @@
+
+/* Reset and body */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #e3dcdc;
+  color: #07182a;
+  margin: 0;
+  padding: 40px 10px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+}
+
+.container {
+  background: #fff;
+  border: 3px solid #e74c3c;
+  padding: 40px 40px;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(231, 76, 60, 0.4);
+  margin: 0 auto;
+  width: 100%;        
+  max-width: 700px;  
+}
+
+h1 {
+  text-align: center;
+  color: #e74c3c;
+  margin-bottom: 15px;
+  font-weight: bold;
+  letter-spacing: 1.2px;
+
+}
+
+p {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 1rem;
+  color: #444;
+  font-weight: bold;
+}
+
+/* Form styling */
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: #e74c3c;
+}
+
+input[type="number"] {
+  padding: 10px 14px;
+  margin-bottom: 20px;
+  font-size: 1rem;
+  border: 2px solid #e74c3c;
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+  font-weight: 500;
+}
+
+input[type="number"]:focus {
+  border-color: #c0392b;
+  outline: none;
+}
+
+button, .btn {
+  background-color: #e74c3c;
+  color: white;
+  font-weight: 700;
+  border: none;
+  padding: 14px 0;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+  margin-top: 10px;
+}
+
+button:hover, .btn:hover {
+  background-color: #c0392b;
+}
+
+.flash {
+  background-color: #fdecea;
+  border-left: 6px solid #e74c3c;
+  padding: 12px 15px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #c0392b;
+  border-radius: 6px;
+  text-align: center;
+}
+
+/* Result text */
+.result-text {
+  font-size: 1.4rem;
+  text-align: center;
+  margin: 30px 0;
+}
+
+/* Chart canvas */
+canvas {
+  margin-top: 20px;
+  border-radius: 12px;
+  background-color: #fff5f5;
+  border: 1.5px solid #e74c3c;
+  box-shadow: 0 4px 10px rgba(231, 76, 60, 0.15);
+}
+
+/* History back button */
+.back-btn {
+  margin-top: 30px;
+  width: 100%;
+}
+
+.history-link {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.history-link a {
+  display: inline-block;
+  background-color: #e74c3c;  /* bright red */
+  color: white;
+  font-weight: 600;
+  padding: 10px 25px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.history-link a:hover {
+  background-color: #c0392b;  /* darker red on hover */
+  box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+}
+ .performance-summary {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #fef9f9;
+  border: 2px solid #e74c3c;
+  border-radius: 10px;
+  padding: 15px 20px;
+  width: 220px;
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.25);
+  font-size: 0.9rem;
+  color: #c0392b;
+  z-index: 1000;
+}
+
+.performance-summary h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.performance-summary ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.performance-summary li {
+  margin-bottom: 6px;
+}
+ 
+#featureChart {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 400px;
+}
+
+.summary-and-chart-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 40px;
+  padding: 20px;
+}
+
+.center-box {
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 30px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 10px;
+  padding: 20px;
+  background: #f9f9f9;
+}
+
+.warning-message {
+  font-size: 16px;
+  line-height: 1.6;
+  display: block;
+}
+
+.green-zone {
+  border-left: 8px solid #2ecc71;
+}
+.yellow-zone {
+  border-left: 8px solid #f1c40f;
+}
+.red-zone {
+  border-left: 8px solid #e74c3c;
+}
+
+.chart-container {
+  position: relative;
+  height: 400px;
+  width: 100%;
+}
